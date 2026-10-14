@@ -19,8 +19,8 @@
   --gilt-soft: #E2C47A;
   --on-velvet: #F6E7C1;
   --on-velvet-sub: #E7CFA0;
-  --serif: 'Noto Serif KR', 'Nanum Myeongjo', serif;
-  --sans: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --serif: 'Nanum Myeongjo', 'Noto Serif KR', serif;
+  --sans: 'Nanum Gothic', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --player-h: 80px;
   --radius: 6px;
   color-scheme: light;
@@ -32,8 +32,9 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   word-break: keep-all;
   overflow-wrap: break-word;
@@ -493,12 +494,19 @@ small { font-size: 0.8em; opacity: 0.85; }
   margin: 8px 6px 36px;
   box-shadow: 0 30px 60px -40px rgba(60, 30, 10, 0.45);
 }
-/* 피아노 건반 띠 */
-.poster-keys {
+/* 악기 장식 띠: 피아노 건반 / 바이올린 현 */
+.poster-deco.piano {
   height: 46px;
   background:
     repeating-linear-gradient(90deg, transparent 0 13px, #1d1714 13px 21px, transparent 21px 34px, #1d1714 34px 42px, transparent 42px 70px, #1d1714 70px 78px, transparent 78px 91px, #1d1714 91px 99px, transparent 99px 112px, #1d1714 112px 120px, transparent 120px 140px) top / 100% 28px no-repeat,
     repeating-linear-gradient(90deg, #fff 0 19px, #CFC3AE 19px 20px);
+  border-bottom: 2px solid var(--velvet);
+}
+.poster-deco.strings {
+  height: 46px;
+  background:
+    linear-gradient(180deg, transparent 0 9px, #E9D9A8 9px 10px, transparent 10px 18px, #E9D9A8 18px 19.5px, transparent 19.5px 27px, #D8C28A 27px 29px, transparent 29px 36px, #C9AE70 36px 38.5px, transparent 38.5px),
+    linear-gradient(90deg, #5A2E17, #8A4B24 30%, #A9612F 50%, #8A4B24 70%, #5A2E17);
   border-bottom: 2px solid var(--velvet);
 }
 .poster-inner { display: flex; flex-wrap: wrap; gap: 32px; padding: 44px 48px 28px; align-items: flex-end; }
@@ -665,3 +673,16 @@ small { font-size: 0.8em; opacity: 0.85; }
 @media (max-width: 959px) {
   .poster-inner { display: grid; grid-template-columns: 1fr; gap: 20px; }
 }
+
+/* ───── 한글 가독성: 나눔 글꼴에 맞춘 크기·간격 보정 ───── */
+.brand-sub, .poster-kicker, .poster-next-label, .fan-artists-label, .panel-kicker, .era-no, .poster-stats dt { letter-spacing: 0.04em; }
+.poster-en, .hero-kicker { letter-spacing: 0.2em; }
+.era-summary, .track-desc, .fan-video-desc, .fan-facts li, .fan-list, .fan-event { font-size: 15.5px; }
+.era-summary, .fan-bio, .poster-line { line-height: 1.85; }
+.track-meta, .track-performer, .chips-label, .fan-dl div, .queue-hint, .list-note, .muted.small, .small { font-size: 14px; }
+.era-facts { font-size: 14.5px; }
+h1, h2, h3, h4, .era-name, .track-title, .poster-name, .player-title, .brand-name { font-weight: 800; }
+.era-tagline, .poster-line, .fan-bio { font-weight: 700; }
+
+.poster-next.empty .poster-next-title { font-size: 15px; margin-top: 10px !important; }
+.fan-empty { margin: 0 0 12px; padding: 14px 16px; background: #fff; border: 1px dashed var(--line); color: var(--sub); }

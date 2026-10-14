@@ -41,8 +41,47 @@ const SECTIONS = [
 ]
 
 export default function FanClub() {
-  const [artistKey, setArtistKey] = useState(artists[0].key)
+  const [artistKey, setArtistKey] = useState(() => {
+    try {
+      const k = localStorage.getItem('mcr.fan.current')
+      return artists.some((a) => a.key === k) ? k : artists[0].key
+    } catch {
+      return artists[0].key
+    }
+  })
+  const pick = (k) => {
+    setArtistKey(k)
+    try {
+      localStorage.setItem('mcr.fan.current', k)
+    } catch {
+      /* 무시 */
+    }
+  }
   const artist = artists.find((a) => a.key === artistKey)
+  return (
+    <div className="fan">
+      {/* 팬클럽 음악가 고르기 (여러 명 구조) */}
+      <nav className="fan-artists" aria-label="팬클럽 음악가">
+        <span className="fan-artists-label">나의 팬클럽</span>
+        {artists.map((a) => (
+          <button
+            type="button"
+            key={a.key}
+            className={`fan-artist ${a.key === artistKey ? 'on' : ''}`}
+            aria-pressed={a.key === artistKey}
+            onClick={() => pick(a.key)}
+          >
+            <b>{a.profile.nameKo}</b>
+            <span>{a.role}</span>
+          </button>
+        ))}
+      </nav>
+      <ArtistPage key={artist.key} artist={artist} />
+    </div>
+  )
+}
+
+function ArtistPage({ artist }) {
   const p = artist.profile
   const { playQueue, playTrack, current, playing, togglePlay, favorites, toggleFavorite, listenLog } = usePlayer()
 
@@ -65,27 +104,10 @@ export default function FanClub() {
   const jump = (id) => document.getElementById(`fan-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
-    <div className="fan">
-      {/* 팬클럽 음악가 고르기 (여러 명 구조) */}
-      <nav className="fan-artists" aria-label="팬클럽 음악가">
-        <span className="fan-artists-label">나의 팬클럽</span>
-        {artists.map((a) => (
-          <button
-            type="button"
-            key={a.key}
-            className={`fan-artist ${a.key === artistKey ? 'on' : ''}`}
-            aria-pressed={a.key === artistKey}
-            onClick={() => setArtistKey(a.key)}
-          >
-            <b>{a.profile.nameKo}</b>
-            <span>{a.role}</span>
-          </button>
-        ))}
-      </nav>
-
+    <>
       {/* 리사이틀 포스터 */}
       <header className="poster">
-        <div className="poster-keys" aria-hidden />
+        <div className={`poster-deco ${artist.deco || 'piano'}`} aria-hidden />
         <div className="poster-inner">
           {cover && (
             <figure className="poster-photo">
@@ -93,7 +115,11 @@ export default function FanClub() {
                 <img src={cover.src} alt={`${p.nameKo} 대표 사진: ${cover.caption}`} />
               </button>
               <figcaption>
-                {cover.kind === 'commons' ? `사진 ${cover.credit} · ${cover.license}` : cover.kind === 'still' ? `영상 화면 · ${cover.credit}` : '내가 올린 사진'}
+                {cover.kind === 'commons'
+                  ? `사진 ${cover.credit} · ${cover.license}`
+                  : cover.kind === 'still'
+                    ? `영상 화면 · ${cover.credit}`
+                    : '내가 올린 사진'}
               </figcaption>
             </figure>
           )}
@@ -149,10 +175,22 @@ export default function FanClub() {
               )}
             </aside>
           )}
+          {!next && (
+            <aside className="poster-next empty" aria-label="다음 공연">
+              <p className="poster-next-label">다음 공연</p>
+              <p className="poster-next-title">공개된 예정 공연이 아직 없습니다</p>
+              <p className="poster-next-venue">새 일정은 공식 채널에서 먼저 발표됩니다.</p>
+              {p.official[0] && (
+                <a href={p.official[0].url} target="_blank" rel="noreferrer">
+                  {p.official[0].label} ↗
+                </a>
+              )}
+            </aside>
+          )}
         </div>
         <dl className="poster-stats">
           <div>
-            <dt>국제 콩쿠르·수상</dt>
+            <dt>수상</dt>
             <dd>{fmt(p.awards.length)}</dd>
           </div>
           <div>
@@ -243,7 +281,13 @@ export default function FanClub() {
         <FanPhotos
           album={album}
           artist={artist}
-          onPlayTrack={(id) => playTrack(id, myTracks.map((x) => x.id), `${p.nameKo} 전체`)}
+          onPlayTrack={(id) =>
+            playTrack(
+              id,
+              myTracks.map((x) => x.id),
+              `${p.nameKo} 전체`,
+            )
+          }
         />
       </section>
 
@@ -318,6 +362,9 @@ export default function FanClub() {
         <h2>
           공연 일정 <small>남은 공연 {fmt(upcoming.length)}회</small>
         </h2>
+        {upcoming.length === 0 && (
+          <p className="fan-empty">공개된 예정 공연이 없습니다. 지난 공연 기록은 아래에서 볼 수 있습니다.</p>
+        )}
         <ol className="fan-concerts">
           {upcoming.map((c, i) => (
             <li key={i} className="fan-concert">
@@ -396,73 +443,85 @@ export default function FanClub() {
           ))}
         </ul>
         <div className="fan-grid2">
-          <div className="fan-card">
-            <h3>콩쿠르·수상</h3>
-            <ul className="fan-list">
-              {p.awards.map((a, i) => (
-                <li key={i}>
-                  <span className="when">{a.year}</span> {a.title}
-                  {a.result && <b className="result"> {a.result}</b>}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="fan-card">
-            <h3>맡았던 역할</h3>
-            <ul className="fan-list">
-              {p.roles.map((r, i) => (
-                <li key={i}>
-                  <span className="when">{r.period}</span> {r.title}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="fan-card">
-            <h3>글쓰기</h3>
-            <ul className="fan-list">
-              {p.books.map((b, i) => (
-                <li key={`b${i}`}>
-                  <span className="when">{b.year}</span> 『{b.title}』 <span className="muted">{b.publisher}</span>
-                  {b.note && <span className="muted small"> · {b.note}</span>}
-                </li>
-              ))}
-              {p.writing.map((w, i) => (
-                <li key={`w${i}`}>
-                  <span className="when">{w.period}</span> {w.where}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="fan-card">
-            <h3>방송·협업</h3>
-            <ul className="fan-list">
-              {p.media.map((m, i) => (
-                <li key={i}>
-                  <span className="when">{m.year}</span> {m.title} <span className="muted small">{m.type}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="fan-card">
-            <h3>자주 연주하는 작곡가</h3>
-            <p className="fan-tags">
-              {p.repertoire.map((r) => (
-                <span key={r} className="fan-tag">
-                  {r}
-                </span>
-              ))}
-            </p>
-          </div>
-          <div className="fan-card">
-            <h3>함께한 음악가·악단</h3>
-            <ul className="fan-list">
-              {p.collaborators.map((c, i) => (
-                <li key={i}>
-                  <b>{c.name}</b> {c.note && <span className="muted small">· {c.note}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {p.awards.length > 0 && (
+            <div className="fan-card">
+              <h3>수상</h3>
+              <ul className="fan-list">
+                {p.awards.map((a, i) => (
+                  <li key={i}>
+                    <span className="when">{a.year}</span> {a.title}
+                    {a.result && <b className="result"> {a.result}</b>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {p.roles.length > 0 && (
+            <div className="fan-card">
+              <h3>맡았던 역할</h3>
+              <ul className="fan-list">
+                {p.roles.map((r, i) => (
+                  <li key={i}>
+                    <span className="when">{r.period}</span> {r.title}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {p.books.length + p.writing.length > 0 && (
+            <div className="fan-card">
+              <h3>글쓰기</h3>
+              <ul className="fan-list">
+                {p.books.map((b, i) => (
+                  <li key={`b${i}`}>
+                    <span className="when">{b.year}</span> 『{b.title}』 <span className="muted">{b.publisher}</span>
+                    {b.note && <span className="muted small"> · {b.note}</span>}
+                  </li>
+                ))}
+                {p.writing.map((w, i) => (
+                  <li key={`w${i}`}>
+                    <span className="when">{w.period}</span> {w.where}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {p.media.length > 0 && (
+            <div className="fan-card">
+              <h3>방송·협업</h3>
+              <ul className="fan-list">
+                {p.media.map((m, i) => (
+                  <li key={i}>
+                    <span className="when">{m.year}</span> {m.title} <span className="muted small">{m.type}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {p.repertoire.length > 0 && (
+            <div className="fan-card">
+              <h3>자주 연주하는 작곡가</h3>
+              <p className="fan-tags">
+                {p.repertoire.map((r) => (
+                  <span key={r} className="fan-tag">
+                    {r}
+                  </span>
+                ))}
+              </p>
+            </div>
+          )}
+          {p.collaborators.length > 0 && (
+            <div className="fan-card">
+              <h3>함께한 음악가·악단</h3>
+              <ul className="fan-list">
+                {p.collaborators.map((c, i) => (
+                  <li key={i}>
+                    <b>{c.name}</b> {c.note && <span className="muted small">· {c.note}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </section>
 
@@ -543,7 +602,7 @@ export default function FanClub() {
           ))}
         </ol>
       </section>
-    </div>
+    </>
   )
 }
 

@@ -14,7 +14,7 @@ export default function EraTracks({ era, compact = false }) {
       {!compact && (
         <header className="panel-head">
           <p className="panel-kicker">
-            {String(era.id).padStart(2, '0')} · {era.years.replace('~', ' – ')}
+            {String(era.id).padStart(2, '0')} · {era.years.startsWith('~') ? era.years : era.years.replace('~', ' – ')}
           </p>
           <h2>{era.name}의 명곡</h2>
           <p className="panel-tagline">{era.tagline}</p>
