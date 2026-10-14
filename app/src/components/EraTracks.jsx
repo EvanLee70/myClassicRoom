@@ -1,13 +1,5 @@
 import { usePlayer } from '../player/usePlayer.js'
-import {
-  composersOfEra,
-  fmt,
-  introOfEra,
-  performersOfEra,
-  tracksOfComposer,
-  tracksOfEra,
-  tracksOfPerformer,
-} from '../data/catalog.js'
+import { fmt, introOfEra, tracksOfEra } from '../data/catalog.js'
 import TrackCard from './TrackCard.jsx'
 
 // 오른쪽(모바일은 시대 이야기 아래): 그 시대의 명곡을 작곡 연도 순으로
@@ -38,45 +30,7 @@ export default function EraTracks({ era, compact = false }) {
         </button>
       </div>
 
-      <div className="chips-block">
-        <span className="chips-label">작곡가</span>
-        <div className="chips">
-          {composersOfEra(era.id).map((c) => {
-            const all = tracksOfComposer(c)
-            return (
-              <button
-                type="button"
-                key={c}
-                className="chip"
-                onClick={() => playQueue(all.map((t) => t.id), 0, `작곡가 · ${c}`)}
-                title={`${c}의 곡 ${fmt(all.length)}곡 이어 듣기`}
-              >
-                {c} <small>{fmt(all.length)}</small>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="chips-block">
-        <span className="chips-label">연주자</span>
-        <div className="chips">
-          {performersOfEra(era.id).map((p) => {
-            const all = tracksOfPerformer(p)
-            return (
-              <button
-                type="button"
-                key={p}
-                className="chip chip-performer"
-                onClick={() => playQueue(all.map((t) => t.id), 0, `연주자 · ${p}`)}
-                title={`${p}의 연주 ${fmt(all.length)}곡 이어 듣기`}
-              >
-                {p} <small>{fmt(all.length)}</small>
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      <p className="queue-hint">작곡가나 연주자 이름을 누르면 그 사람의 곡을 모두 이어 듣습니다.</p>
 
       <ol className="track-list" aria-label={`${era.name} 명곡, 작곡 연도 순`}>
         {list.map((t, i) => (
