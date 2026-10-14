@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { usePlayer } from '../player/usePlayer.js'
-import { eraById, fmt, trackById } from '../data/catalog.js'
+import { fmt, placeLabel, trackById } from '../data/catalog.js'
 
 export default function LibraryDrawer({ open, onClose }) {
   const { favorites, recent, playQueue, toggleFavorite, clearRecent } = usePlayer()
@@ -45,7 +45,7 @@ export default function LibraryDrawer({ open, onClose }) {
                   <li key={id}>
                     <button className="drawer-item" onClick={() => playQueue(ids, i, name)}>
                       <span className="pill">
-                        {eraById[t.era].name}
+                        {placeLabel(t)}
                       </span>
                       <span className="d-title">{t.title}</span>
                       <span className="d-comp">

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePlayer } from '../player/usePlayer.js'
-import { eraById, fmt, searchUrl, trackById } from '../data/catalog.js'
+import { fmt, placeLabel, searchUrl, trackById } from '../data/catalog.js'
 
 const FAIL_TEXT = {
   video: '이 곡의 영상은 지금 재생할 수 없습니다.',
@@ -20,7 +20,7 @@ export default function PlayerBar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const era = current ? eraById[current.era] : null
+  const place = current ? placeLabel(current) : ''
   const fav = current && p.favorites.includes(current.id)
 
   return (
@@ -110,9 +110,9 @@ export default function PlayerBar() {
           {current ? (
             <>
               <p className="player-label">
-                {era && (
+                {place && (
                   <span className="pill">
-                    {era.name}
+                    {place}
                     {current.workYear && ` · ${current.workYear}`}
                   </span>
                 )}

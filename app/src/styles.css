@@ -453,3 +453,176 @@ small { font-size: 0.8em; opacity: 0.85; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ───── 화면 전환 탭 ───── */
+.view-tabs { grid-column: 1 / -1; display: flex; gap: 4px; margin-top: 2px; }
+.view-tabs button {
+  min-height: 40px; padding: 0 18px;
+  border: none; border-bottom: 3px solid transparent; background: none;
+  color: var(--on-velvet-sub); font-family: var(--serif); font-size: 15px; font-weight: 700;
+}
+.view-tabs button.on { color: var(--on-velvet); border-bottom-color: var(--gilt); }
+.view-tabs button:hover { color: var(--on-velvet); }
+.topbar:has(.view-tabs) .era-strip { padding-top: 2px; }
+
+/* ───── 팬클럽 (리사이틀 포스터) ───── */
+.fan-page { padding-bottom: calc(var(--player-h) + 60px); background: #FBF8F2; }
+@media (min-width: 960px) { .fan-page { flex: 1; min-height: 0; overflow-y: auto; } }
+.fan { max-width: 1120px; margin: 0 auto; padding: 24px 32px 0; }
+.fan h2 { font-family: var(--serif); font-weight: 900; font-size: 28px; margin: 0 0 16px; letter-spacing: -0.01em; }
+.fan h2 small { font-family: var(--sans); font-size: 14px; font-weight: 400; color: var(--muted); margin-left: 8px; }
+.fan h3 { font-family: var(--serif); font-size: 17px; margin: 0 0 8px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+.fan-artists { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 20px; }
+.fan-artists-label { font-size: 12.5px; letter-spacing: 0.12em; color: var(--muted); margin-right: 4px; }
+.fan-artist {
+  display: inline-flex; align-items: baseline; gap: 8px; min-height: 44px; padding: 0 16px;
+  border-radius: 999px; border: 1px solid var(--line); background: #fff;
+}
+.fan-artist b { font-family: var(--serif); }
+.fan-artist span { font-size: 12.5px; color: var(--muted); }
+.fan-artist.on { border-color: var(--velvet); box-shadow: inset 0 0 0 1px var(--velvet); }
+
+.poster {
+  position: relative; overflow: hidden;
+  background: #fff;
+  border: 1px solid #E3D6BF;
+  outline: 1px solid #E3D6BF; outline-offset: 6px;
+  margin: 8px 6px 36px;
+  box-shadow: 0 30px 60px -40px rgba(60, 30, 10, 0.45);
+}
+/* 피아노 건반 띠 */
+.poster-keys {
+  height: 46px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 13px, #1d1714 13px 21px, transparent 21px 34px, #1d1714 34px 42px, transparent 42px 70px, #1d1714 70px 78px, transparent 78px 91px, #1d1714 91px 99px, transparent 99px 112px, #1d1714 112px 120px, transparent 120px 140px) top / 100% 28px no-repeat,
+    repeating-linear-gradient(90deg, #fff 0 19px, #CFC3AE 19px 20px);
+  border-bottom: 2px solid var(--velvet);
+}
+.poster-inner { display: flex; flex-wrap: wrap; gap: 32px; padding: 44px 48px 28px; align-items: flex-end; }
+.poster-main { flex: 1 1 460px; min-width: 0; }
+.poster-kicker { margin: 0; font-size: 13px; letter-spacing: 0.3em; color: var(--velvet); font-weight: 700; }
+.poster-name {
+  margin: 6px 0 0; font-family: var(--serif); font-weight: 900;
+  font-size: clamp(64px, 10vw, 120px); line-height: 1; letter-spacing: 0.04em; color: var(--ink);
+}
+.poster-en { margin: 10px 0 0; font-family: var(--serif); font-size: 18px; letter-spacing: 0.42em; text-transform: uppercase; color: var(--accent); }
+.poster-line { margin: 18px 0 0; max-width: 560px; font-size: 16px; color: var(--sub); font-family: var(--serif); }
+.poster-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.btn.velvet { background: var(--velvet); border-color: var(--velvet); color: var(--on-velvet); font-weight: 700; }
+.btn.velvet:hover:not(:disabled) { background: var(--velvet-2); }
+.poster-next {
+  flex: 0 1 280px; padding: 18px 20px;
+  border: 1px solid var(--velvet); background: #FFFCF6; text-align: center;
+}
+.poster-next p { margin: 0; }
+.poster-next-label { font-size: 12px; letter-spacing: 0.24em; color: var(--velvet); }
+.poster-dday { font-family: var(--serif); font-weight: 900; font-size: 44px; line-height: 1.15; color: var(--velvet); }
+.poster-next-date { font-weight: 700; }
+.poster-next-title { font-family: var(--serif); margin-top: 6px !important; }
+.poster-next-venue { font-size: 13px; color: var(--muted); margin-bottom: 8px !important; }
+.poster-next a { font-size: 13px; }
+.poster-stats {
+  margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid #E3D6BF;
+}
+.poster-stats div { padding: 14px 10px; text-align: center; border-left: 1px solid #E3D6BF; }
+.poster-stats div:first-child { border-left: none; }
+.poster-stats dt { font-size: 12px; color: var(--muted); }
+.poster-stats dd { margin: 0; font-family: var(--serif); font-weight: 900; font-size: 26px; }
+
+.fan-sections {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+  padding: 10px 0; margin-bottom: 8px;
+  background: #FBF8F2; border-bottom: 3px double var(--line);
+}
+.fan-sections::-webkit-scrollbar { display: none; }
+.fan-sections button {
+  flex: none; min-height: 40px; padding: 0 14px; border: none; background: none;
+  font-size: 14px; color: var(--sub); border-radius: 999px;
+}
+.fan-sections button:hover { background: var(--faint); color: var(--ink); }
+
+.fan-sec { padding: 32px 0 12px; scroll-margin-top: 64px; }
+.fan-bio { font-size: 16px; line-height: 1.9; color: var(--sub); max-width: 820px; margin: 0 0 18px; font-family: var(--serif); }
+.fan-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+.fan-card { background: #fff; border: 1px solid #E6DAC5; padding: 18px 20px; }
+.fan-card + .fan-card { margin-top: 0; }
+.fan-dl { margin: 0; display: grid; gap: 6px; }
+.fan-dl div { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 8px; font-size: 14px; }
+.fan-dl dt { color: var(--muted); }
+.fan-dl dd { margin: 0; }
+.fan-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 7px; font-size: 14px; }
+.fan-list .when { display: inline-block; min-width: 76px; font-family: var(--serif); font-weight: 700; color: var(--accent); }
+.fan-list .result { color: var(--velvet); }
+.fan-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.fan-links a { font-weight: 500; }
+
+.fan-timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+.fan-timeline::before { content: ''; position: absolute; left: 87px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
+.fan-timeline li { display: grid; grid-template-columns: 72px 32px minmax(0, 1fr); padding: 7px 0; align-items: baseline; }
+.fan-year { font-family: var(--serif); font-weight: 700; font-size: 17px; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fan-dot { justify-self: center; width: 10px; height: 10px; border-radius: 50%; background: #FBF8F2; border: 2px solid var(--velvet); }
+.fan-event { font-size: 15px; }
+
+.fan-videos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.fan-video { background: #fff; border: 1px solid #E6DAC5; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.fan-video.is-current { border-color: var(--velvet); box-shadow: inset 0 0 0 1px var(--velvet); }
+.fan-video h3 { margin: 0; font-size: 16.5px; }
+.fan-video p { margin: 0; }
+.fan-video-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.fan-video-desc { font-size: 14px; color: var(--sub); line-height: 1.7; flex: 1; }
+.fan-video-actions { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.fan-tag { display: inline-block; font-size: 12px; padding: 1px 9px; border-radius: 999px; background: var(--faint); border: 1px solid var(--line-2); color: var(--ink); }
+.fan-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+
+.fan-concerts { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fan-concert { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 18px; background: #fff; border: 1px solid #E6DAC5; padding: 14px 18px; }
+.fan-concert h3 { margin: 0 0 2px; font-size: 16px; }
+.fan-concert p { margin: 0; }
+.fan-concert-date { display: flex; flex-direction: column; border-right: 1px solid #E6DAC5; padding-right: 12px; }
+.fan-concert-date b { font-family: var(--serif); font-weight: 900; font-size: 24px; color: var(--velvet); line-height: 1.2; }
+.fan-concert-date span { font-size: 13.5px; font-weight: 500; }
+.fan-concert.past { background: transparent; }
+.fan-past { margin-top: 14px; }
+.fan-past summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--accent); font-weight: 500; }
+.fan-past .fan-concerts { margin-top: 8px; }
+
+.fan-albums { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+.fan-albums li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; background: #fff; border: 1px solid #E6DAC5; padding: 14px 16px; }
+.fan-albums h3 { margin: 0; font-size: 15.5px; }
+.fan-albums p { margin: 2px 0 0; }
+.fan-albums .fan-year { text-align: left; }
+
+.fan-facts { margin: 0 0 18px; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+.fan-facts li { position: relative; padding: 12px 14px 12px 38px; background: #fff; border: 1px solid #E6DAC5; font-size: 14.5px; line-height: 1.7; }
+.fan-facts li::before { content: '♪'; position: absolute; left: 14px; top: 11px; color: var(--velvet); font-weight: 700; }
+
+.fan-memo {
+  width: 100%; margin-top: 8px; padding: 12px; font: inherit; font-size: 15px; line-height: 1.7;
+  border: 1px solid var(--line); background: #FFFDF8; color: var(--ink); resize: vertical;
+}
+.fan-memo:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fan-sources { margin: 10px 0 0; padding-left: 22px; display: grid; gap: 4px; font-size: 13.5px; }
+
+@media (max-width: 959px) {
+  .fan { padding: 16px 12px 0; }
+  .poster { margin: 6px 4px 28px; }
+  .poster-inner { padding: 28px 20px 20px; }
+  .poster-name { font-size: 64px; }
+  .poster-en { font-size: 14px; letter-spacing: 0.3em; }
+  .poster-next { flex: 1 1 100%; }
+  .poster-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .poster-stats div:nth-child(3) { border-left: none; }
+  .poster-stats div:nth-child(n+3) { border-top: 1px solid #E3D6BF; }
+  .fan-sections { top: 0; }
+  .fan-grid2, .fan-facts, .fan-albums { grid-template-columns: 1fr; }
+  .fan-concert { grid-template-columns: 1fr; gap: 8px; }
+  .fan-concert-date { border-right: none; padding-right: 0; flex-direction: row; gap: 10px; align-items: baseline; }
+  .fan-timeline::before { left: 67px; }
+  .fan-timeline li { grid-template-columns: 52px 32px minmax(0, 1fr); }
+  .fan-year { font-size: 15px; }
+}

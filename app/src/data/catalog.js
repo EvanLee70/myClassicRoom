@@ -1,6 +1,7 @@
 // 곡 목록과 대기열을 만드는 도우미 함수 모음
 import rawTracks from './tracks.json'
 import eras from './eras.js'
+import artists, { fanTracks } from './artists/index.js'
 
 // "1690년경" → 1690, "9세기경" → 800 (세기는 그 세기의 첫해로)
 export function yearNum(s) {
@@ -16,9 +17,13 @@ const tracks = [...rawTracks].sort(
   (a, b) => a.era - b.era || yearNum(a.workYear) - yearNum(b.workYear) || a.order - b.order,
 )
 
-export { tracks, eras }
+export { tracks, eras, artists, fanTracks }
 
-export const trackById = Object.fromEntries(tracks.map((t) => [t.id, t]))
+// 재생기·즐겨찾기는 연표 곡과 팬클럽 영상을 함께 다룬다
+export const trackById = Object.fromEntries([...tracks, ...fanTracks].map((t) => [t.id, t]))
+export const artistByKey = Object.fromEntries(artists.map((a) => [a.key, a]))
+// 곡이 속한 곳의 이름표: 시대 이름 또는 "팬클럽 · 음악가"
+export const placeLabel = (t) => (t.era ? eraById[t.era]?.name : `팬클럽 · ${t.artistName}`)
 export const eraById = Object.fromEntries(eras.map((e) => [e.id, e]))
 
 // 시대 연도 나누기: "1600~1750" → { from: "1600", to: "1750" }

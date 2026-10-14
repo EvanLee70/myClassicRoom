@@ -6,6 +6,7 @@ import { PlayerCtx } from './usePlayer.js'
 
 const LS_FAV = 'mcr.favorites'
 const LS_RECENT = 'mcr.recent'
+const LS_LOG = 'mcr.listenLog' // { 곡id: { count, last: 'YYYY-MM-DD' } }
 const RECENT_MAX = 30
 const SKIP_DELAY = 6 // 초: 재생 불가 곡에서 다음 곡으로 넘어가기까지
 
@@ -35,6 +36,14 @@ export function PlayerProvider({ children }) {
   const [countdown, setCountdown] = useState(0)
   const [favorites, setFavorites] = useState(() => readLS(LS_FAV, []))
   const [recent, setRecent] = useState(() => readLS(LS_RECENT, []))
+  const [listenLog, setListenLog] = useState(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem(LS_LOG))
+      return v && typeof v === 'object' && !Array.isArray(v) ? v : {}
+    } catch {
+      return {}
+    }
+  })
 
   const ytRef = useRef(null) // YT.Player
   const ytReady = useRef(false)
@@ -50,6 +59,7 @@ export function PlayerProvider({ children }) {
 
   useEffect(() => writeLS(LS_FAV, favorites), [favorites])
   useEffect(() => writeLS(LS_RECENT, recent), [recent])
+  useEffect(() => writeLS(LS_LOG, listenLog), [listenLog])
   useEffect(() => () => clearInterval(timerRef.current), []) // 화면이 사라질 때 타이머 정리
 
   const clearTimer = useCallback(() => {
@@ -159,6 +169,12 @@ export function PlayerProvider({ children }) {
     pendingRef.current = null
     if (!current) return
     setRecent((r) => [current.id, ...r.filter((id) => id !== current.id)].slice(0, RECENT_MAX))
+    const d = new Date()
+    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    setListenLog((log) => ({
+      ...log,
+      [current.id]: { count: (log[current.id]?.count || 0) + 1, last: today },
+    }))
     if (audioRef.current) audioRef.current.pause()
     if (!current.youtubeId) {
       handleFail(current, 'video')
@@ -218,6 +234,7 @@ export function PlayerProvider({ children }) {
     countdown,
     favorites,
     recent,
+    listenLog,
     audioRef,
     setPlaying,
     mountYouTube,
