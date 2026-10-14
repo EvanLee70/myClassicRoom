@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { usePlayer } from '../player/usePlayer.js'
 import { artists, fanTracks, fmt } from '../data/catalog.js'
+import { usePhotoAlbum } from '../lib/usePhotoAlbum.js'
+import FanPhotos from './FanPhotos.jsx'
 
 // 오늘 날짜(로컬) 'YYYY-MM-DD'
 function todayStr() {
@@ -28,6 +30,7 @@ function readMemo(key) {
 
 const SECTIONS = [
   ['intro', '소개'],
+  ['photos', '사진첩'],
   ['timeline', '연표'],
   ['listen', '연주 듣기'],
   ['concerts', '공연 일정'],
@@ -44,6 +47,8 @@ export default function FanClub() {
   const { playQueue, playTrack, current, playing, togglePlay, favorites, toggleFavorite, listenLog } = usePlayer()
 
   const myTracks = fanTracks.filter((t) => t.artist === artist.key)
+  const album = usePhotoAlbum(artist, myTracks)
+  const cover = album.cover
   const performances = myTracks.filter((t) => t.type !== 'interview')
   const today = todayStr()
   const upcoming = artist.concerts.filter((c) => c.date >= today)
@@ -82,6 +87,16 @@ export default function FanClub() {
       <header className="poster">
         <div className="poster-keys" aria-hidden />
         <div className="poster-inner">
+          {cover && (
+            <figure className="poster-photo">
+              <button type="button" onClick={() => jump('photos')} aria-label="사진첩 열기">
+                <img src={cover.src} alt={`${p.nameKo} 대표 사진: ${cover.caption}`} />
+              </button>
+              <figcaption>
+                {cover.kind === 'commons' ? `사진 ${cover.credit} · ${cover.license}` : cover.kind === 'still' ? `영상 화면 · ${cover.credit}` : '내가 올린 사진'}
+              </figcaption>
+            </figure>
+          )}
           <div className="poster-main">
             <p className="poster-kicker">
               {artist.role} · {p.born?.date?.slice(0, 4)} · {p.born?.place}
@@ -220,6 +235,18 @@ export default function FanClub() {
       </section>
 
       {/* 연표 */}
+      {/* 사진첩 */}
+      <section id="fan-photos" className="fan-sec">
+        <h2>
+          사진첩 <small>{fmt(album.all.length)}장 · 사진을 눌러 크게 보고 대표 사진을 고르세요</small>
+        </h2>
+        <FanPhotos
+          album={album}
+          artist={artist}
+          onPlayTrack={(id) => playTrack(id, myTracks.map((x) => x.id), `${p.nameKo} 전체`)}
+        />
+      </section>
+
       <section id="fan-timeline" className="fan-sec">
         <h2>연표</h2>
         <ol className="fan-timeline">

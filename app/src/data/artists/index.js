@@ -7,6 +7,12 @@ const artists = [
     key: 'son-yeoleum',
     role: '피아니스트',
     country: '대한민국',
+    // 위키미디어 공용 사진 찾기: 검색어와, 파일 제목에 들어 있어야 할 이름
+    photoSearch: {
+      terms: ['"Yeol Eum Son"', '"Yeol-eum Son"', '"Son Yeol-eum"', '손열음'],
+      wiki: { lang: 'ko', title: '손열음' },
+      names: ['yeol eum son', 'yeol-eum son', 'son yeol-eum', 'son yeol eum', 'yeoleum', '손열음'],
+    },
   },
 ]
 
