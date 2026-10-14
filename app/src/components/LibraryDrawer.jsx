@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { usePlayer } from '../player/PlayerContext.jsx'
+import { usePlayer } from '../player/usePlayer.js'
 import { eraById, fmt, trackById } from '../data/catalog.js'
 
 export default function LibraryDrawer({ open, onClose }) {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { allIntro, eraById, eras, fmt, tracks } from './data/catalog.js'
-import { usePlayer } from './player/PlayerContext.jsx'
+import { usePlayer } from './player/usePlayer.js'
 import HistoryPane from './components/HistoryPane.jsx'
 import EraTracks from './components/EraTracks.jsx'
 import PlayerBar from './components/PlayerBar.jsx'
@@ -57,8 +57,13 @@ export default function App() {
   // 시대가 바뀌면 오른쪽 패널을 맨 위로, 상단 띠는 해당 칩이 보이게
   useEffect(() => {
     panelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-    const chip = stripRef.current?.querySelector(`[data-chip="${activeEra}"]`)
-    chip?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+    // 띠 안에서만 가로로 움직인다 (scrollIntoView는 바깥 페이지 스크롤까지 건드릴 수 있음)
+    const strip = stripRef.current
+    const chip = strip?.querySelector(`[data-chip="${activeEra}"]`)
+    if (strip && chip) {
+      const left = chip.offsetLeft - (strip.clientWidth - chip.offsetWidth) / 2
+      strip.scrollTo({ left: Math.max(0, left), behavior: 'smooth' })
+    }
   }, [activeEra])
 
   const jumpTo = useCallback((id) => {

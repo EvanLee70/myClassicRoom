@@ -1,4 +1,4 @@
-import { usePlayer } from '../player/PlayerContext.jsx'
+import { usePlayer } from '../player/usePlayer.js'
 import {
   composersOfEra,
   fmt,

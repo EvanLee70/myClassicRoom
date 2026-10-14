@@ -71,6 +71,7 @@ small { font-size: 0.78em; opacity: 0.75; }
 .top-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
 
 .era-strip {
+  position: relative;
   grid-column: 1 / -1;
   display: flex; gap: 6px;
   overflow-x: auto; scrollbar-width: none;
@@ -392,3 +393,4 @@ small { font-size: 0.78em; opacity: 0.75; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+.fail-hint { color: var(--muted); font-size: 13px !important; }

@@ -1,16 +1,19 @@
-import { usePlayer } from '../player/PlayerContext.jsx'
+import { usePlayer } from '../player/usePlayer.js'
 
 export default function TrackCard({ track, contextIds, contextName, no }) {
-  const { current, playing, playTrack, favorites, toggleFavorite } = usePlayer()
+  const { current, playing, mode, playTrack, togglePlay, favorites, toggleFavorite } = usePlayer()
   const isCurrent = current?.id === track.id
   const fav = favorites.includes(track.id)
+  // 지금 듣는 곡을 다시 누르면 처음부터 다시 틀지 않고 일시정지·재개
+  const onPlay = () =>
+    isCurrent && mode !== 'failed' ? togglePlay() : playTrack(track.id, contextIds, contextName)
 
   return (
     <article className={`track ${isCurrent ? 'is-current' : ''}`}>
       <button
         className="track-play"
-        onClick={() => playTrack(track.id, contextIds, contextName)}
-        aria-label={`${track.title} 재생`}
+        onClick={onPlay}
+        aria-label={isCurrent && playing ? `${track.title} 일시정지` : `${track.title} 재생`}
       >
         {isCurrent && playing ? <span className="eq" aria-hidden><i /><i /><i /></span> : '▶'}
       </button>

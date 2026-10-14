@@ -193,6 +193,14 @@ for e, ts in sorted(per_era.items()):
     n_intro = sum(t["intro"] for t in ts)
     if n_intro != 3:
         errors.append(f"시대 {e}: 입문곡 {n_intro}개")
+for t in tracks:
+    for k in ("fallbackUrl", "fallbackAudio"):
+        if t[k] and not t[k].startswith("https://"):
+            errors.append(f"{t['id']}: {k} 가 https 주소가 아님 → 제거")
+            t[k] = None
+    if t["youtubeId"] and not re.fullmatch(r"[A-Za-z0-9_-]{11}", t["youtubeId"]):
+        errors.append(f"{t['id']}: 영상 ID 형식 오류 → 제거")
+        t["youtubeId"] = None
 yt_ids = [t["youtubeId"] for t in tracks if t["youtubeId"]]
 dups = {y for y in yt_ids if yt_ids.count(y) > 1}
 if dups:

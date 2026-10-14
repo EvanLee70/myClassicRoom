@@ -1,10 +1,8 @@
 // 재생기 상태: 대기열, 유튜브 재생, 대체 음원 자동 전환, 즐겨찾기, 최근 들은 곡
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { trackById } from '../data/catalog.js'
 import { loadYouTubeApi } from './youtube.js'
-
-const PlayerCtx = createContext(null)
-export const usePlayer = () => useContext(PlayerCtx)
+import { PlayerCtx } from './usePlayer.js'
 
 const LS_FAV = 'mcr.favorites'
 const LS_RECENT = 'mcr.recent'
@@ -32,6 +30,7 @@ export function PlayerProvider({ children }) {
   const [index, setIndex] = useState(-1)
   const [label, setLabel] = useState('')
   const [mode, setMode] = useState('idle') // idle | youtube | audio | failed
+  const [failReason, setFailReason] = useState('') // video | blocked | audio
   const [playing, setPlaying] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [favorites, setFavorites] = useState(() => readLS(LS_FAV, []))
@@ -39,6 +38,7 @@ export function PlayerProvider({ children }) {
 
   const ytRef = useRef(null) // YT.Player
   const ytReady = useRef(false)
+  const ytBlocked = useRef(false) // 유튜브 자체를 불러오지 못한 환경
   const mountingRef = useRef(false)
   const pendingRef = useRef(null) // API 준비 전 요청된 영상
   const audioRef = useRef(null)
@@ -50,12 +50,13 @@ export function PlayerProvider({ children }) {
 
   useEffect(() => writeLS(LS_FAV, favorites), [favorites])
   useEffect(() => writeLS(LS_RECENT, recent), [recent])
+  useEffect(() => () => clearInterval(timerRef.current), []) // 화면이 사라질 때 타이머 정리
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     clearInterval(timerRef.current)
     timerRef.current = null
     setCountdown(0)
-  }
+  }, [])
 
   const goTo = useCallback((i) => {
     const { queue: q } = stateRef.current
@@ -70,17 +71,20 @@ export function PlayerProvider({ children }) {
   const prev = useCallback(() => goTo(stateRef.current.index - 1), [goTo])
 
   // 재생 실패 처리: 대체 음원 → 없으면 안내 후 자동으로 다음 곡
+  // reason: video(영상 막힘) | blocked(유튜브 접속 불가) | audio(대체 음원도 실패)
   const handleFail = useCallback(
-    (track) => {
+    (track, reason = 'video') => {
+      pendingRef.current = null
       try {
         ytRef.current?.stopVideo?.()
       } catch {
         /* 무시 */
       }
-      if (track?.fallbackAudio) {
+      if (track?.fallbackAudio && reason !== 'audio') {
         setMode('audio')
         return
       }
+      setFailReason(reason)
       setMode('failed')
       setPlaying(false)
       clearTimer()
@@ -98,8 +102,13 @@ export function PlayerProvider({ children }) {
         }, 1000)
       }
     },
-    [next],
+    [next, clearTimer],
   )
+
+  const currentTrack = () => {
+    const { queue: q, index: i } = stateRef.current
+    return trackById[q[i]]
+  }
 
   // 유튜브 재생기 만들기 (PlayerBar가 자리를 마련한 뒤 호출)
   const mountYouTube = useCallback(
@@ -109,34 +118,37 @@ export function PlayerProvider({ children }) {
       // React가 관리하지 않는 안쪽 자리를 따로 만들어 iframe으로 바꾼다
       const slot = document.createElement('div')
       el.appendChild(slot)
-      loadYouTubeApi().then((YT) => {
-        ytRef.current = new YT.Player(slot, {
-          width: '100%',
-          height: '100%',
-          playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
-          events: {
-            onReady: () => {
-              ytReady.current = true
-              if (pendingRef.current) {
-                ytRef.current.loadVideoById(pendingRef.current)
-                pendingRef.current = null
-              }
+      loadYouTubeApi()
+        .then((YT) => {
+          ytRef.current = new YT.Player(slot, {
+            width: '100%',
+            height: '100%',
+            playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
+            events: {
+              onReady: () => {
+                ytReady.current = true
+                if (pendingRef.current) {
+                  ytRef.current.loadVideoById(pendingRef.current)
+                  pendingRef.current = null
+                }
+              },
+              onStateChange: (e) => {
+                if (e.data === 1) setPlaying(true)
+                if (e.data === 2) setPlaying(false)
+                if (e.data === 0) {
+                  setPlaying(false)
+                  next()
+                }
+              },
+              onError: () => handleFail(currentTrack(), 'video'),
             },
-            onStateChange: (e) => {
-              if (e.data === 1) setPlaying(true)
-              if (e.data === 2) setPlaying(false)
-              if (e.data === 0) {
-                setPlaying(false)
-                next()
-              }
-            },
-            onError: () => {
-              const { queue: q, index: i } = stateRef.current
-              handleFail(trackById[q[i]])
-            },
-          },
+          })
         })
-      })
+        .catch(() => {
+          // 광고 차단기·사내망 등으로 유튜브를 못 불러온 경우: 조용히 멈추지 않고 알린다
+          ytBlocked.current = true
+          if (pendingRef.current) handleFail(currentTrack(), 'blocked')
+        })
     },
     [handleFail, next],
   )
@@ -144,11 +156,16 @@ export function PlayerProvider({ children }) {
   // 곡이 바뀌면 재생
   useEffect(() => {
     clearTimer()
+    pendingRef.current = null
     if (!current) return
     setRecent((r) => [current.id, ...r.filter((id) => id !== current.id)].slice(0, RECENT_MAX))
     if (audioRef.current) audioRef.current.pause()
     if (!current.youtubeId) {
-      handleFail(current)
+      handleFail(current, 'video')
+      return
+    }
+    if (ytBlocked.current) {
+      handleFail(current, 'blocked')
       return
     }
     setMode('youtube')
@@ -175,12 +192,12 @@ export function PlayerProvider({ children }) {
   )
 
   const togglePlay = useCallback(() => {
-    if (mode === 'youtube' && ytRef.current) {
+    if (mode === 'youtube' && ytReady.current) {
       const s = ytRef.current.getPlayerState?.()
       if (s === 1) ytRef.current.pauseVideo()
       else ytRef.current.playVideo()
     } else if (mode === 'audio' && audioRef.current) {
-      if (audioRef.current.paused) audioRef.current.play()
+      if (audioRef.current.paused) audioRef.current.play().catch(() => {})
       else audioRef.current.pause()
     }
   }, [mode])
@@ -196,6 +213,7 @@ export function PlayerProvider({ children }) {
     label,
     current,
     mode,
+    failReason,
     playing,
     countdown,
     favorites,
@@ -210,6 +228,7 @@ export function PlayerProvider({ children }) {
     prev,
     goTo,
     cancelSkip: clearTimer,
+    failAudio: () => handleFail(currentTrack(), 'audio'),
     toggleFavorite,
     clearRecent: () => setRecent([]),
   }

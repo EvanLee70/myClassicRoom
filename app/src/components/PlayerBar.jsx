@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { usePlayer } from '../player/PlayerContext.jsx'
+import { usePlayer } from '../player/usePlayer.js'
 import { eraById, fmt, searchUrl, trackById } from '../data/catalog.js'
+
+const FAIL_TEXT = {
+  video: '이 곡의 영상은 지금 재생할 수 없습니다.',
+  blocked: '유튜브에 연결할 수 없어 재생하지 못했습니다.',
+  audio: '대체 녹음도 재생하지 못했습니다.',
+}
 
 export default function PlayerBar() {
   const p = usePlayer()
@@ -38,15 +44,18 @@ export default function PlayerBar() {
           onPlay={() => p.setPlaying(true)}
           onPause={() => p.setPlaying(false)}
           onEnded={p.next}
-          onError={() => p.next()}
+          onError={p.failAudio}
         />
       )}
 
       {current && mode === 'failed' && (
         <div className="fail-box" role="status">
           <p>
-            <b>이 곡의 영상은 지금 재생할 수 없습니다.</b>
+            <b>{FAIL_TEXT[p.failReason] || FAIL_TEXT.video}</b>
           </p>
+          {p.failReason === 'blocked' && (
+            <p className="fail-hint">광고 차단 프로그램이나 회사·공용 와이파이의 차단을 확인해 주세요.</p>
+          )}
           <div className="fail-links">
             {current.fallbackUrl && (
               <a href={current.fallbackUrl} target="_blank" rel="noreferrer">
