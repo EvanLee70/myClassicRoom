@@ -44,7 +44,7 @@ export default function LibraryDrawer({ open, onClose }) {
                 return (
                   <li key={id}>
                     <button className="drawer-item" onClick={() => playQueue(ids, i, name)}>
-                      <span className="pill" style={{ '--accent': eraById[t.era].accent }}>
+                      <span className="pill">
                         {eraById[t.era].name}
                       </span>
                       <span className="d-title">{t.title}</span>

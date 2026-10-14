@@ -1,11 +1,31 @@
 // 곡 목록과 대기열을 만드는 도우미 함수 모음
-import tracks from './tracks.json'
+import rawTracks from './tracks.json'
 import eras from './eras.js'
+
+// "1690년경" → 1690, "9세기경" → 800 (세기는 그 세기의 첫해로)
+export function yearNum(s) {
+  const txt = s || ''
+  const c = txt.match(/(\d{1,2})세기/)
+  if (c) return (Number(c[1]) - 1) * 100
+  const y = txt.match(/(\d{3,4})/)
+  return y ? Number(y[1]) : 9999
+}
+
+// 시대 순 → 같은 시대 안에서는 작곡 연도 순 (같은 해는 원래 순서 유지)
+const tracks = [...rawTracks].sort(
+  (a, b) => a.era - b.era || yearNum(a.workYear) - yearNum(b.workYear) || a.order - b.order,
+)
 
 export { tracks, eras }
 
 export const trackById = Object.fromEntries(tracks.map((t) => [t.id, t]))
 export const eraById = Object.fromEntries(eras.map((e) => [e.id, e]))
+
+// 시대 연도 나누기: "1600~1750" → { from: "1600", to: "1750" }
+export function eraRange(era) {
+  const [from, to] = era.years.split('~')
+  return from ? { from, to: to || '' } : { from: `~${to}`, to: '' }
+}
 
 // 연주자 대표 이름: "트레버 피녹 / 잉글리시 콘서트" → "트레버 피녹"
 export const performerKey = (p) => (p || '').split('/')[0].trim()

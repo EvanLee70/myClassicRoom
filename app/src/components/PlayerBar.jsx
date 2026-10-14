@@ -105,12 +105,17 @@ export default function PlayerBar() {
         </div>
       )}
 
-      <footer className="player" style={{ '--accent': era?.accent || '#d4af37' }}>
+      <footer className="player">
         <div className="player-info">
           {current ? (
             <>
               <p className="player-label">
-                {era && <span className="pill">{era.name}</span>}
+                {era && (
+                  <span className="pill">
+                    {era.name}
+                    {current.workYear && ` · ${current.workYear}`}
+                  </span>
+                )}
                 {label && <span className="player-queue-name">{label}</span>}
                 {mode === 'audio' && <span className="pill alt">무료 녹음으로 재생 중</span>}
               </p>
@@ -125,7 +130,9 @@ export default function PlayerBar() {
         </div>
         <div className="player-ctrl">
           <button onClick={p.prev} disabled={index <= 0} aria-label="이전 곡">
-            ⏮
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+              <path d="M3 3v10M13 3L5 8l8 5z" fill="currentColor" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
           </button>
           <button
             className="play-main"
@@ -136,7 +143,9 @@ export default function PlayerBar() {
             {playing ? '❚❚' : '▶'}
           </button>
           <button onClick={p.next} disabled={index < 0 || index >= queue.length - 1} aria-label="다음 곡">
-            ⏭
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+              <path d="M13 3v10M3 3l8 5-8 5z" fill="currentColor" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
         <div className="player-side">

@@ -73,31 +73,38 @@ export default function App() {
   const era = eraById[activeEra]
 
   return (
-    <div className="app" style={{ '--accent': era.accent }}>
+    <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark" aria-hidden>♪</span>
+          <svg className="brand-mark" width="44" height="44" viewBox="0 0 44 44" aria-hidden>
+            <circle cx="22" cy="22" r="21" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M18 30V13l12-3v16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="15" cy="30" r="3.4" fill="currentColor" />
+            <circle cx="27" cy="26" r="3.4" fill="currentColor" />
+          </svg>
           <div>
             <p className="brand-name">myClassicRoom</p>
-            <p className="brand-sub">나의 클래식 음악실</p>
+            <p className="brand-sub">나의 클래식 음악실 · 성가에서 영화음악까지</p>
           </div>
         </div>
         <div className="top-actions">
           <button
-            className="btn gold"
+            type="button"
+            className="btn gilt"
             onClick={() => playQueue(tracks.map((t) => t.id), 0, '클래식 한 바퀴')}
-            title="중세부터 현재까지 모든 곡을 시대 순서대로"
+            title="중세부터 현재까지 모든 곡을 시대·연도 순서대로"
           >
             ▶ 한 바퀴 듣기 <small>{fmt(tracks.length)}곡</small>
           </button>
           <button
-            className="btn"
-            onClick={() => playQueue(allIntro().map((t) => t.id), 0, '입문 한 바퀴')}
-            title="시대별 입문곡만 시대 순서대로"
+            type="button"
+            className="btn on-velvet"
+            onClick={() => playQueue(allIntro().map((t) => t.id), 0, '추천곡 한 바퀴')}
+            title="시대별 추천곡만 시대·연도 순서대로"
           >
-            ⭐ 입문 <small>{fmt(allIntro().length)}곡</small>
+            <span className="star" aria-hidden>★</span> 추천곡만 <small>{fmt(allIntro().length)}곡</small>
           </button>
-          <button className="btn" onClick={() => setDrawer(true)}>
+          <button type="button" className="btn on-velvet" onClick={() => setDrawer(true)}>
             내 음악실 {favorites.length > 0 && <small>♥ {fmt(favorites.length)}</small>}
           </button>
         </div>
@@ -106,8 +113,8 @@ export default function App() {
             <button
               key={e.id}
               data-chip={e.id}
+              type="button"
               className={e.id === activeEra ? 'on' : ''}
-              style={{ '--accent': e.accent }}
               onClick={() => jumpTo(e.id)}
             >
               <span>{String(e.id).padStart(2, '0')}</span> {e.name}
@@ -117,7 +124,7 @@ export default function App() {
       </header>
 
       <main className="layout">
-        <HistoryPane ref={historyRef} activeEra={activeEra} isDesktop={isDesktop} />
+        <HistoryPane ref={historyRef} activeEra={activeEra} isDesktop={isDesktop} onPick={jumpTo} />
         {isDesktop && (
           <aside className="panel" ref={panelRef} aria-live="polite">
             <EraTracks key={era.id} era={era} />
